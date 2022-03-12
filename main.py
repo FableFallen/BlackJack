@@ -87,23 +87,33 @@ class animation:
                 
 
 def sort(arr):
-    tpath = 'C:\\Users\\bestm\\OneDrive\\Desktop\\Game\\Black Jack\\data\\Cards\\Diamonds\\'
+    tpath = '.\\data\\Cards\\'
     start = len(tpath)
     card_num = ''
     card_suit = ''
     offset = 0
+    card_val = ['1','2','3','4','5','6','7','8','9','10','11','12','13']
     temp = ['','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','']
-    print(len(temp))
+    
     for path in arr:
-        card = path[start:-1].replace('.jp','')
-        card_suit = path[start:-1].replace('.jp','')
+        section = 0
+        #Removes file extension
+        card = path[len(tpath):-1].replace('.jp','')
+        #removes folder infront example: folder/img.jpg  -> img.jpg
+        for folder in ['Diamonds\\','Clubs\\','Hearts\\','Spades\\']:
+             if (folder) in card:
+                 card = card.replace(folder, '')
+        
+        card_suit = card
         i = 0
         while i < (len(card_suit)):
             if card_suit[i] in ['0','1','2','3','4','5','6','7','8','9']:
                 card_suit = card_suit.replace(card_suit[i], '')
                 i -=1
             i+=1
-        
+
+        start = len(path[:len(tpath)+len(card_suit)])+1
+        #Getting the card value from the file
         if card_suit == 'clubs':
             offset = 0
             card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
@@ -116,23 +126,23 @@ def sort(arr):
         elif card_suit == 'spades':
             offset = 3
             card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]  
-        temp[int(card_num)+offset] = path
-    # index = 0
-    # while index<(len(temp)):
-    #     if temp[index] == '':
-    #         print(temp[index])
-    #         del temp[index]
-    #         index -= 1
-    #     index += 1
+        index = 0
+        while index < len(card_val):
+            if card_num == card_val[index]:
+                break
+            index += 1
+            section += 4
+
+        temp[section +offset] = path
+        
     return temp
 
 paths = []
 cards = []
 for folder in ['Diamonds','Clubs','Hearts','Spades']:
-    for filename in glob.glob(f'C:\\Users\\bestm\\OneDrive\\Desktop\\Game\\Black Jack\\data\\Cards\\{folder}\\*.jpg'):
+    for filename in glob.glob(f'.\\data\\Cards\\{folder}\\*.jpg'):
         paths.append(filename)
-for file in paths:
-    print(file)
+
 paths = (sort(paths))
 
 for path in paths:
