@@ -85,30 +85,59 @@ class animation:
                 
         return self.col
                 
-    
+
+def sort(arr):
+    tpath = 'C:\\Users\\bestm\\OneDrive\\Desktop\\Game\\Black Jack\\data\\Cards\\Diamonds\\'
+    start = len(tpath)
+    card_num = ''
+    card_suit = ''
+    offset = 0
+    temp = ['','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','']
+    print(len(temp))
+    for path in arr:
+        card = path[start:-1].replace('.jp','')
+        card_suit = path[start:-1].replace('.jp','')
+        i = 0
+        while i < (len(card_suit)):
+            if card_suit[i] in ['0','1','2','3','4','5','6','7','8','9']:
+                card_suit = card_suit.replace(card_suit[i], '')
+                i -=1
+            i+=1
+        
+        if card_suit == 'clubs':
+            offset = 0
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
+        elif card_suit == 'diamonds':
+            offset = 1
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
+        elif card_suit == 'hearts':
+            offset = 2
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
+        elif card_suit == 'spades':
+            offset = 3
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]  
+        temp[int(card_num)+offset] = path
+    # index = 0
+    # while index<(len(temp)):
+    #     if temp[index] == '':
+    #         print(temp[index])
+    #         del temp[index]
+    #         index -= 1
+    #     index += 1
+    return temp
 
 paths = []
-diamonds = []
-def sort(arr):
-    temp = []
-    tempstr = 'C:\\Users\\bestm\\OneDrive\\Desktop\\Game\\Black Jack\\data\\Cards\\Diamonds\\'
-    cnt = 0
-    numbers = ['1','2','3','4','5','6','7','8','9','10','11','12','12','13']
+cards = []
+for folder in ['Diamonds','Clubs','Hearts','Spades']:
+    for filename in glob.glob(f'C:\\Users\\bestm\\OneDrive\\Desktop\\Game\\Black Jack\\data\\Cards\\{folder}\\*.jpg'):
+        paths.append(filename)
+for file in paths:
+    print(file)
+paths = (sort(paths))
 
-    while len(temp) < len(arr):
-        for i, num in enumerate(numbers):
-            pass
-            
-        #cnt+=1
-    return temp
-for filename in glob.glob('C:\\Users\\bestm\\OneDrive\\Desktop\\Game\\Black Jack\\data\\Cards\\Diamonds\\*.jpg'):
-    paths.append(filename)
-
-#print(sort(paths))
-#print(paths)
 for path in paths:
     img = pygame.image.load(path)
-    diamonds.append(img)
+    cards.append(img)
 
 def game():
     title = Text('Whatever', 40, alagard_font)
@@ -117,11 +146,11 @@ def game():
         screen.fill((0,0,0))
         title.draw(screen, True)
         title.set_animation(1, True, False, False)
-        if cnt >= len(diamonds):
+        if cnt >= len(cards):
             cnt = 0
         elif cnt < 0:
-            cnt = len(diamonds)-1
-        screen.blit(diamonds[cnt], (0,0))
+            cnt = len(cards)-1
+        screen.blit(cards[cnt], (0,0))
         
         for event in pygame.event.get():
             if event.type == QUIT:
