@@ -152,7 +152,14 @@ for path in paths:
 def game():
     title = Text('Whatever', 40, alagard_font)
     cnt = 0
+    game_btn = [pygame.Rect(WINDOW_SIZE[0]//2-100,WINDOW_SIZE[1] - 
+    WINDOW_SIZE[1]//3 - 50, 200,100),pygame.Rect(WINDOW_SIZE[0]//2-100,WINDOW_SIZE[1] - 
+    WINDOW_SIZE[1]//3 - 50, 200,100)]
+
+    click  = False
+    drag = False
     while True:
+        mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
         title.draw(screen, True)
         title.set_animation(1, True, False, False)
@@ -161,11 +168,28 @@ def game():
         elif cnt < 0:
             cnt = len(cards)-1
         screen.blit(cards[cnt], (0,0))
-        
+        if game_btn[0].collidepoint(mx,my) and drag:
+            game_btn[0].x, game_btn[0].y = mx-100, my-50
+        elif game_btn[0].collidepoint(mx,my) and click:
+            print('Hit me')
+
+
+
+        for btn in game_btn:
+            pygame.draw.rect(screen, (20,234,200), btn)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+                if event.button == 1 and pygame.key.get_mods() & pygame.KMOD_LSHIFT:
+                    drag = True
+            if event.type == MOUSEBUTTONUP:
+                if event.button == 1:
+                    click = False
+                    drag = False
             if event.type == KEYDOWN:
                 if event.key == pygame.K_a:
                     cnt -= 1
@@ -174,6 +198,7 @@ def game():
                 if event.key == pygame.K_q:
                     pygame.quit()
                     sys.exit()
+            
         
         pygame.display.update()   
         clock.tick(60)
