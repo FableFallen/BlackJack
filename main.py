@@ -5,6 +5,7 @@ from pygame.locals import * # Importing all the modules from pygame
 from PIL import Image
 import glob
 
+global cards, card_vals
 pygame.init()
 WINDOW_SIZE = ((600,800))
 screen = pygame.display.set_mode(WINDOW_SIZE)
@@ -13,7 +14,7 @@ clock = pygame.time.Clock()
 alagard_font = "data/fonts/alagard/alagard.ttf"
 paths = []
 cards = []
-card_val = []
+card_vals = []
 
 for folder in ['Diamonds','Clubs','Hearts','Spades']:
     for filename in glob.glob(f'.\\data\\Cards\\{folder}\\*.jpg'):
@@ -82,17 +83,34 @@ class Deck:
     def __init__(self, cards, cardValues):
         self.cards = cards
         self.vals = cardValues
+        
     
     def randomize(self, seed):
+        cardh1 = []
+        cardh2 = []
+        allcard = []
         for num in seed:
             #cut half deck
-            if num == 0:
-                pass
-            #two halves merge every other
-            if num == 1:
-                pass
+            if num == '0':
+                cardh1 = self.cards[:len(self.cards)//2]
+                cardh2 = self.cards[len(self.cards)//2:]
+                allcard = cardh2 + cardh1
+            #two halves merge every other riffle shuffle
+            if num == '1':
+                cardh1 = self.cards[:len(self.cards)//2]
+                cardh2 = self.cards[len(self.cards)//2:]
+                for index in range(len(self.cards)//2):
+                    allcard.append(cardh1[index])
+                    allcard.append(cardh2[index])
             #Middle cut
-            #Portion Cuts until full deck random
+            if num == '2':
+                pass
+            #top cut- 1/3 off top to bottom
+            if num == '3':
+                pass
+            #bottom cut- 1/3 off bottom to top
+            if num == '4':
+                pass
 
     
 
@@ -176,9 +194,6 @@ class animation:
         return self.col
                 
 
-
-
-
 def game():
     offset = 100
     title = Text('BlackJack', [0,0,0], 80, screen, WINDOW_SIZE[0], WINDOW_SIZE[1], 0, 0, alagard_font)
@@ -186,6 +201,7 @@ def game():
     game_txt = [Text('Hit',[200,254, 22], 50, screen, game_btn[0].width, game_btn[0].height, game_btn[0].x, game_btn[0].y, alagard_font), Text('Stand', [200,254, 22],  10, screen, game_btn[1].w, game_btn[1].h, game_btn[1].x, game_btn[1].y, alagard_font)]
     selector_rect = game_btn[0]
     selectPos = [game_btn[1].y, game_btn[0].y]
+    deck = Deck(cards, card_vals)
     pos_index = 1
     click  = False
     drag = False
@@ -242,6 +258,13 @@ def game():
                     click = False
                     drag = False
             if event.type == KEYDOWN:
+                if event.key == pygame.K_t:
+                    print('T Pressed!')
+                    deck.randomize('1')
+                if event.key == pygame.K_w:
+                    pos_index += 1
+                if event.key == pygame.K_s:
+                    pos_index -= 1
                 if event.key == pygame.K_UP:
                     pos_index += 1
                 if event.key == pygame.K_DOWN:
