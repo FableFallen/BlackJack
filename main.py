@@ -13,6 +13,7 @@ clock = pygame.time.Clock()
 alagard_font = "data/fonts/alagard/alagard.ttf"
 paths = []
 cards = []
+card_val = []
 
 for folder in ['Diamonds','Clubs','Hearts','Spades']:
     for filename in glob.glob(f'.\\data\\Cards\\{folder}\\*.jpg'):
@@ -25,7 +26,10 @@ def sort(arr):
     offset = 0
     card_val = ['1','2','3','4','5','6','7','8','9','10','11','12','13']
     temp = ['','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','']
-    
+    tempValues = []
+    for ele in temp:
+        tempValues.append(0)
+
     for path in arr:
         section = 0
         #Removes file extension
@@ -65,9 +69,10 @@ def sort(arr):
             section += 4
 
         temp[section +offset] = path
+        tempValues[section + offset] = int(card_num)
 
-    return temp
-paths = sort(paths)
+    return temp, tempValues
+paths,card_vals = sort(paths)
 for path in paths:
     img = pygame.image.load(path)
     cards.append(img)
@@ -77,7 +82,17 @@ class Deck:
     def __init__(self, cards, cardValues):
         self.cards = cards
         self.vals = cardValues
-
+    
+    def randomize(self, seed):
+        for num in seed:
+            #cut half deck
+            if num == 0:
+                pass
+            #two halves merge every other
+            if num == 1:
+                pass
+            #Middle cut
+            #Portion Cuts until full deck random
 
     
 
