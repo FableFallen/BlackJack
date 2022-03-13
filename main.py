@@ -1,3 +1,5 @@
+from selectors import SelectSelector
+from tkinter.tix import WINDOW
 import pygame,sys,time,os
 from pygame.locals import * # Importing all the modules from pygame
 from PIL import Image
@@ -11,20 +13,20 @@ clock = pygame.time.Clock()
 alagard_font = "data/fonts/alagard/alagard.ttf"
 
 class Text:
-    def __init__(self, text, size, font = None):
+    def __init__(self, text, color, size, surf, w ,h, x, y,font = 'arial'):
         self.text = text
         self.font = font
         self.size = size
-        self.color = [0,0,0]
-        self.pyfont = None
-        self.textobj = None
-        self.textrect = None
-        self.x, self.y = 0,0
-        self.surf = pygame.display.get_surface()
+        self.color = color
+        self.pyfont = pygame.font.Font(self.font, self.size)
+        self.textobj = self.pyfont.render(self.text, True, self.color)
+        self.textrect = self.textobj.get_rect(center=(w/2,h/2))
+        self.x =x
+        self.y = y
+        self.w, self.h = w,h
+        self.surf = surf
+        self.font = font
         self.ani = animation(self.color)
-            
-    def set_surface(self):
-        self.surf = pygame.display.get_surface()
         
     def set_text(self,text):
         self.text = text
@@ -39,20 +41,19 @@ class Text:
             self.color = self.ani.fade(spd, True)
         elif blink:
             self.color = self.ani.blink(spd)
-            
-    def set_surfDim(self):
-        self.x,self.y = pygame.display.get_surface().get_size()
-        self.x /=2
-        self.y /=2
-    
-    def draw(self, surface, center):
-        self.set_surfDim()
-        self.pyfont = pygame.font.Font(self.font, self.size)
+
+    def draw(self, center, size=None):
         self.textobj = self.pyfont.render(self.text, True, self.color)
-        self.textrect = self.textobj.get_rect()
-        if center:
-            self.textrect.center = (self.x, self.y)
-        surface.blit(self.textobj, self.textrect)
+        if size != None:
+            self.pyfont = pygame.font.Font(self.font, size)
+            self.textobj = self.pyfont.render(self.text, True, self.color)
+            self.textrect = self.textobj.get_rect()
+
+        if center:  
+            self.textrect.x = self.x+(self.w/2-self.textrect.width/2)
+            self.textrect.y = self.y+(self.h/2-self.textrect.height/2)
+
+        self.surf.blit(self.textobj, self.textrect)
 
 
 class animation:
@@ -134,7 +135,7 @@ def sort(arr):
             section += 4
 
         temp[section +offset] = path
-        
+
     return temp
 
 paths = []
@@ -150,33 +151,53 @@ for path in paths:
     cards.append(img)
 
 def game():
-    title = Text('Whatever', 40, alagard_font)
-    cnt = 0
-    game_btn = [pygame.Rect(WINDOW_SIZE[0]//2-100,WINDOW_SIZE[1] - 
-    WINDOW_SIZE[1]//3 - 50, 200,100),pygame.Rect(WINDOW_SIZE[0]//2-100,WINDOW_SIZE[1] - 
-    WINDOW_SIZE[1]//3 - 50, 200,100)]
-
+    offset = 100
+    title = Text('BlackJack', [0,0,0], 80, screen, WINDOW_SIZE[0], WINDOW_SIZE[1], 0, 0, alagard_font)
+    game_btn = [pygame.Rect(title.textrect.x-(200 - title.textrect.width)//2, title.textrect.y-(60 - title.textrect.height)//2- offset, 200,60),pygame.Rect(title.textrect.x-(200 - title.textrect.width)//2,title.textrect.y-(60 - title.textrect.height)//2 + offset, 200,60)]
+    game_txt = [Text('Hit',[200,254, 22], 50, screen, game_btn[0].width, game_btn[0].height, game_btn[0].x, game_btn[0].y, alagard_font), Text('Stand', [200,254, 22],  10, screen, game_btn[1].w, game_btn[1].h, game_btn[1].x, game_btn[1].y, alagard_font)]
+    selector_rect = game_btn[0]
+    selectPos = [game_btn[1].y, game_btn[0].y]
+    pos_index = 1
     click  = False
     drag = False
+    size = 30
+    cnt = 0
     while True:
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
-        title.draw(screen, True)
-        title.set_animation(1, True, False, False)
+        #Card Postion
         if cnt >= len(cards):
             cnt = 0
         elif cnt < 0:
             cnt = len(cards)-1
+        #Drawing Cards
         screen.blit(cards[cnt], (0,0))
+        #Clicking/Dragging Button Actions
         if game_btn[0].collidepoint(mx,my) and drag:
             game_btn[0].x, game_btn[0].y = mx-100, my-50
         elif game_btn[0].collidepoint(mx,my) and click:
-            print('Hit me')
+            pass
+        elif game_btn[1].collidepoint(mx,my) and drag:
+            game_btn[1].x, game_btn[1].y = mx-100, my-50
 
+        #Pos Counter
+        if pos_index < 0:
+            pos_index = 0
+        if pos_index > 1:
+            pos_index = 1
+        
+        selector_rect.y = selectPos[pos_index]
+        #Selector Rect
+        pygame.draw.rect(screen, (145,223,232), selector_rect)
 
+        #Drawing Buttons and Text on buttons
+        for i in range(len(game_btn)):
+            # pygame.draw.rect(screen, (20,234,200), game_btn[i])
+            game_txt[i].draw(True, size)
+            game_txt[i].set_animation(10, False,False, True)
 
-        for btn in game_btn:
-            pygame.draw.rect(screen, (20,234,200), btn)
+        title.draw(True)
+        title.set_animation(1, True, False, False)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -188,9 +209,23 @@ def game():
                     drag = True
             if event.type == MOUSEBUTTONUP:
                 if event.button == 1:
+                    print(mx-100, ' ' , my-50)
                     click = False
                     drag = False
             if event.type == KEYDOWN:
+                if event.key == pygame.K_UP:
+                    pos_index += 1
+                if event.key == pygame.K_DOWN:
+                    pos_index -= 1
+                if event.key == pygame.K_w and pygame.key.get_mods() & pygame.KMOD_ALT and pygame.KMOD_LCTRL:
+                    pygame.quit
+                    sys.exit()
+                if event.key == pygame.K_MINUS:
+                    size -= 10
+                    print(size)
+                if event.key == pygame.K_EQUALS:
+                    size += 10
+                    print(size)
                 if event.key == pygame.K_a:
                     cnt -= 1
                 if event.key == pygame.K_d:
