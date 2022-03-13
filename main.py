@@ -55,7 +55,6 @@ class Text:
 
         self.surf.blit(self.textobj, self.textrect)
 
-
 class animation:
     def __init__(self, color):
         self.col = color
@@ -84,8 +83,11 @@ class animation:
             elif self.col[i] <= 0:
                 self.col[i] = 255
                 
-        return self.col
-                
+        return self.col           
+
+class player:
+    def __init__(self):
+        pass
 
 def sort(arr):
     tpath = '.\\data\\Cards\\'
