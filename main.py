@@ -11,6 +11,80 @@ screen = pygame.display.set_mode(WINDOW_SIZE)
 title = pygame.display.set_caption('Black Jack')
 clock = pygame.time.Clock()
 alagard_font = "data/fonts/alagard/alagard.ttf"
+paths = []
+cards = []
+
+for folder in ['Diamonds','Clubs','Hearts','Spades']:
+    for filename in glob.glob(f'.\\data\\Cards\\{folder}\\*.jpg'):
+        paths.append(filename)
+def sort(arr):
+    tpath = '.\\data\\Cards\\'
+    start = len(tpath)
+    card_num = ''
+    card_suit = ''
+    offset = 0
+    card_val = ['1','2','3','4','5','6','7','8','9','10','11','12','13']
+    temp = ['','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','']
+    
+    for path in arr:
+        section = 0
+        #Removes file extension
+        card = path[len(tpath):-1].replace('.jp','')
+        #removes folder infront example: folder/img.jpg  -> img.jpg
+        for folder in ['Diamonds\\','Clubs\\','Hearts\\','Spades\\']:
+            if (folder) in card:
+                card = card.replace(folder, '')
+        
+        card_suit = card
+        i = 0
+        while i < (len(card_suit)):
+            if card_suit[i] in ['0','1','2','3','4','5','6','7','8','9']:
+                card_suit = card_suit.replace(card_suit[i], '')
+                i -=1
+            i+=1
+
+        start = len(path[:len(tpath)+len(card_suit)])+1
+        #Getting the card value from the file
+        if card_suit == 'clubs':
+            offset = 0
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
+        elif card_suit == 'diamonds':
+            offset = 1
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
+        elif card_suit == 'hearts':
+            offset = 2
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
+        elif card_suit == 'spades':
+            offset = 3
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]  
+        index = 0
+        while index < len(card_val):
+            if card_num == card_val[index]:
+                break
+            index += 1
+            section += 4
+
+        temp[section +offset] = path
+
+    return temp
+paths = sort(paths)
+for path in paths:
+    img = pygame.image.load(path)
+    cards.append(img)
+
+#Store Cards, Randomize cards, acess cards, card values
+class Deck:
+    def __init__(self, cards, cardValues):
+        self.cards = cards
+        self.vals = cardValues
+
+
+    
+
+#Draw Cards on screen, check values
+class Deal:
+    def __init__(self):
+        pass
 
 class Text:
     def __init__(self, text, color, size, surf, w ,h, x, y,font = 'arial'):
@@ -55,6 +129,7 @@ class Text:
 
         self.surf.blit(self.textobj, self.textrect)
 
+
 class animation:
     def __init__(self, color):
         self.col = color
@@ -83,74 +158,11 @@ class animation:
             elif self.col[i] <= 0:
                 self.col[i] = 255
                 
-        return self.col           
+        return self.col
+                
 
-class player:
-    def __init__(self):
-        pass
 
-def sort(arr):
-    tpath = '.\\data\\Cards\\'
-    start = len(tpath)
-    card_num = ''
-    card_suit = ''
-    offset = 0
-    card_val = ['1','2','3','4','5','6','7','8','9','10','11','12','13']
-    temp = ['','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','']
-    
-    for path in arr:
-        section = 0
-        #Removes file extension
-        card = path[len(tpath):-1].replace('.jp','')
-        #removes folder infront example: folder/img.jpg  -> img.jpg
-        for folder in ['Diamonds\\','Clubs\\','Hearts\\','Spades\\']:
-             if (folder) in card:
-                 card = card.replace(folder, '')
-        
-        card_suit = card
-        i = 0
-        while i < (len(card_suit)):
-            if card_suit[i] in ['0','1','2','3','4','5','6','7','8','9']:
-                card_suit = card_suit.replace(card_suit[i], '')
-                i -=1
-            i+=1
 
-        start = len(path[:len(tpath)+len(card_suit)])+1
-        #Getting the card value from the file
-        if card_suit == 'clubs':
-            offset = 0
-            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
-        elif card_suit == 'diamonds':
-            offset = 1
-            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
-        elif card_suit == 'hearts':
-            offset = 2
-            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
-        elif card_suit == 'spades':
-            offset = 3
-            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]  
-        index = 0
-        while index < len(card_val):
-            if card_num == card_val[index]:
-                break
-            index += 1
-            section += 4
-
-        temp[section +offset] = path
-
-    return temp
-
-paths = []
-cards = []
-for folder in ['Diamonds','Clubs','Hearts','Spades']:
-    for filename in glob.glob(f'.\\data\\Cards\\{folder}\\*.jpg'):
-        paths.append(filename)
-
-paths = (sort(paths))
-
-for path in paths:
-    img = pygame.image.load(path)
-    cards.append(img)
 
 def game():
     offset = 100
