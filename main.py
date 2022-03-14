@@ -84,40 +84,93 @@ class Deck:
         self.cards = cards
         self.vals = cardValues
         
-    
     def randomize(self, seed):
-        cardh1 = []
-        cardh2 = []
-        allcard = []
         for num in seed:
+            cardh1 = []
+            cardh2 = []
+            cardh3 = []
+            cardh4 = []
+            val1 = []
+            val2 = []
+            val3 = []
+            val4 = []
+            allcard = []
+            allval = []
             #cut half deck
             if num == '0':
                 cardh1 = self.cards[:len(self.cards)//2]
                 cardh2 = self.cards[len(self.cards)//2:]
+                val1 = self.vals[:len(self.cards)//2]
+                val2 = self.vals[len(self.cards)//2:]
+                allval = val2 + val1
                 allcard = cardh2 + cardh1
             #two halves merge every other riffle shuffle
             if num == '1':
                 cardh1 = self.cards[:len(self.cards)//2]
                 cardh2 = self.cards[len(self.cards)//2:]
+                val1 = self.vals[:len(self.cards)//2]
+                val2 = self.vals[len(self.cards)//2:]
                 for index in range(len(self.cards)//2):
+                    allval.append(val1[index])
+                    allval.append(val2[index])
                     allcard.append(cardh1[index])
                     allcard.append(cardh2[index])
             #Middle cut
             if num == '2':
-                pass
+                cardh1 = self.cards[0:13]
+                cardh2 = self.cards[13:26]
+                cardh3 = self.cards[26:39]
+                cardh4 = self.cards[39:]
+                val1 = self.vals[0:13]
+                val2 = self.vals[13:26]
+                val3 = self.vals[26:39]
+                val4 = self.vals[39:]
+                allval = val2+val3+val1+val4
+                allcard = cardh2+cardh3+cardh1+cardh4
+
             #top cut- 1/3 off top to bottom
             if num == '3':
-                pass
+                cardh1 = self.cards[0:18]
+                cardh2 = self.cards[18:34]
+                cardh3 = self.cards[34:]
+                val1 = self.vals[0:18]
+                val2 = self.vals[18:34]
+                val3 = self.vals[34:]
+                allval = val1+val2+val3
+                allcard = cardh2+cardh3+cardh1
             #bottom cut- 1/3 off bottom to top
             if num == '4':
-                pass
+                cardh1 = self.cards[0:18]
+                cardh2 = self.cards[18:34]
+                cardh3 = self.cards[34:]
+                val1 = self.vals[0:18]
+                val2 = self.vals[18:34]
+                val3 = self.vals[34:]
+                allval = val3+val1+val2
+                allcard = cardh3+cardh1+cardh2
+            self.cards = allcard
+            self.vals = allval
 
+    def get_top(self, pos):
+        top = self.cards[0]
+        del self.cards[0]
+        self.cards.insert(-1, top)
+        self.vals.insert(len(self.vals), self.vals.pop(0))
+        return top
     
 
 #Draw Cards on screen, check values
 class Deal:
-    def __init__(self):
-        pass
+    def __init__(self, screen, deck):
+        self.screen = screen
+        self.deck = deck
+    
+    def hand(self, x , y):
+        cards = []
+
+
+    def draw(self):
+        screen.blit()
 
 class Text:
     def __init__(self, text, color, size, surf, w ,h, x, y,font = 'arial'):
@@ -260,7 +313,8 @@ def game():
             if event.type == KEYDOWN:
                 if event.key == pygame.K_t:
                     print('T Pressed!')
-                    deck.randomize('1')
+                    deck.randomize('0')
+                    print(deck.vals)
                 if event.key == pygame.K_w:
                     pos_index += 1
                 if event.key == pygame.K_s:
