@@ -72,10 +72,11 @@ def sort(arr):
 
         temp[section +offset] = path
         tempValues[section + offset] = (card_num)
-    print(tempValues)
     return temp, tempValues
+
 temp = []
 paths,temp = sort(paths)
+
 for path in paths:
     img = pygame.image.load(path)
     cards.append(img)
@@ -84,7 +85,6 @@ for val in temp:
         card_vals.append(10)
     else:
         card_vals.append(int(val))
-print(card_vals)
 #Store Cards, Randomize cards, acess cards, card values
 class Deck:
     def __init__(self, cards, cardValues):
@@ -367,9 +367,10 @@ def game():
                     playerhand.deal_card()
                 if event.key == pygame.K_y:
                     print(playerhand.history)
-                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_btn[0]):
+                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[0].textrect) == True:
+                    print(selector_rect.colliderect(game_txt[0].textrect) == True)
                     playerhand.deal_card()
-                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_btn[1]):
+                elif event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[1].textrect) == True:
                     dealerhand.deal_card()
                 if event.key == pygame.K_w:
                     pos_index += 1
@@ -379,6 +380,7 @@ def game():
                     pos_index += 1
                 if event.key == pygame.K_DOWN:
                     pos_index -= 1
+
                 if event.key == pygame.K_w and pygame.key.get_mods() & pygame.KMOD_ALT and pygame.KMOD_LCTRL:
                     pygame.quit
                     sys.exit()
