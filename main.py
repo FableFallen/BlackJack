@@ -61,8 +61,9 @@ def sort(arr):
             card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
         elif card_suit == 'spades':
             offset = 3
-            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]  
+            card_num = path[start+len(card_suit): (start + len(card_suit)) + len(card) - len(card_suit)]
         index = 0
+
         while index < len(card_val):
             if card_num == card_val[index]:
                 break
@@ -70,19 +71,27 @@ def sort(arr):
             section += 4
 
         temp[section +offset] = path
-        tempValues[section + offset] = int(card_num)
-
+        tempValues[section + offset] = (card_num)
+    print(tempValues)
     return temp, tempValues
-paths,card_vals = sort(paths)
+temp = []
+paths,temp = sort(paths)
 for path in paths:
     img = pygame.image.load(path)
     cards.append(img)
-
+for val in temp:
+    if val in ['11','12','13']:
+        card_vals.append(10)
+    else:
+        card_vals.append(int(val))
+print(card_vals)
 #Store Cards, Randomize cards, acess cards, card values
 class Deck:
     def __init__(self, cards, cardValues):
         self.cards = cards
         self.vals = cardValues
+        self.usedCard = []
+        self.usedVal = []
         
     def randomize(self, seed):
         for num in seed:
@@ -151,26 +160,58 @@ class Deck:
             self.cards = allcard
             self.vals = allval
 
-    def get_top(self, pos):
+    def get_top(self):
         top = self.cards[0]
+        top_val = self.vals[0]
+        self.usedCard.append(top)
+        self.usedVal.append(top_val)
         del self.cards[0]
-        self.cards.insert(-1, top)
-        self.vals.insert(len(self.vals), self.vals.pop(0))
-        return top
-    
+        del self.vals[0]
 
-#Draw Cards on screen, check values
+        return [top,top_val]
+
+#deck = Deck(cards, cards_vals)
+#playerhand = Deal(screen, deck)
+#playerhand.drawCard() --> history.append(self.deck.get_top) for i range(len(history)): screen.blit(history[i][0], (0,0))
+
+#Display cards in hand
 class Deal:
-    def __init__(self, screen, deck):
+    def __init__(self, screen, deck, start):
         self.screen = screen
         self.deck = deck
+        self.start = start
+        self.history = []
+        self.first = True
+        self.ace_Vals = [False,False,False,False]
     
     def hand(self, x , y):
         cards = []
 
+    def busted(self, new_vals):
+        for i in range(len(new_vals)):
+            if new_vals[i] == True:
+                self.deck.vals[i] == 11 
+        sum = 0
+        for card in self.history:
+            sum += card[1]
 
-    def draw(self):
-        screen.blit()
+        if sum > 21:
+            return True
+        else:
+            return False
+    
+    def deal_card(self):
+        self.history.append(self.deck.get_top())
+        if self.first and len(self.history) == 1 and self.history[0][1] == 1:
+            self.history[0][1] = 11
+            self.first = False
+    
+    def draw_hand(self):
+        offset = 0
+        for card in self.history:
+            screen.blit(card[0], (0+offset,self.start))
+            offset += 100
+        
 
 class Text:
     def __init__(self, text, color, size, surf, w ,h, x, y,font = 'arial'):
@@ -255,21 +296,27 @@ def game():
     selector_rect = game_btn[0]
     selectPos = [game_btn[1].y, game_btn[0].y]
     deck = Deck(cards, card_vals)
+    deck.randomize('0132102110')
+    playerhand = Deal(screen,deck,WINDOW_SIZE[1]-deck.cards[-1].get_height())
+    dealerhand = Deal(screen,deck, 0)
+    aceValues = [False,False,False,False]
     pos_index = 1
     click  = False
     drag = False
     size = 30
     cnt = 0
     while True:
+        if(playerhand.busted(aceValues)):
+            title.text = 'You Lose!'
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
-        #Card Postion
-        if cnt >= len(cards):
-            cnt = 0
-        elif cnt < 0:
-            cnt = len(cards)-1
-        #Drawing Cards
-        screen.blit(cards[cnt], (0,0))
+        # #Card Postion
+        # if cnt >= len(cards):
+        #     cnt = 0
+        # elif cnt < 0:
+        #     cnt = len(cards)-1
+        # #Drawing Cards
+        # screen.blit(cards[cnt], (0,0))
         #Clicking/Dragging Button Actions
         if game_btn[0].collidepoint(mx,my) and drag:
             game_btn[0].x, game_btn[0].y = mx-100, my-50
@@ -294,6 +341,10 @@ def game():
             game_txt[i].draw(True, size)
             game_txt[i].set_animation(10, False,False, True)
 
+        #Draw hands
+        playerhand.draw_hand()
+        dealerhand.draw_hand()
+
         title.draw(True)
         title.set_animation(1, True, False, False)
         for event in pygame.event.get():
@@ -312,9 +363,14 @@ def game():
                     drag = False
             if event.type == KEYDOWN:
                 if event.key == pygame.K_t:
-                    print('T Pressed!')
-                    deck.randomize('0')
-                    print(deck.vals)
+                    print(busted)
+                    playerhand.deal_card()
+                if event.key == pygame.K_y:
+                    print(playerhand.history)
+                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_btn[0]):
+                    playerhand.deal_card()
+                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_btn[1]):
+                    dealerhand.deal_card()
                 if event.key == pygame.K_w:
                     pos_index += 1
                 if event.key == pygame.K_s:
