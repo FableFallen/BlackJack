@@ -170,10 +170,6 @@ class Deck:
 
         return [top,top_val]
 
-#deck = Deck(cards, cards_vals)
-#playerhand = Deal(screen, deck)
-#playerhand.drawCard() --> history.append(self.deck.get_top) for i range(len(history)): screen.blit(history[i][0], (0,0))
-
 #Display cards in hand
 class Deal:
     def __init__(self, screen, deck, start):
@@ -310,14 +306,7 @@ def game():
             title.text = 'You Lose!'
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
-        # #Card Postion
-        # if cnt >= len(cards):
-        #     cnt = 0
-        # elif cnt < 0:
-        #     cnt = len(cards)-1
-        # #Drawing Cards
-        # screen.blit(cards[cnt], (0,0))
-        #Clicking/Dragging Button Actions
+        
         if game_btn[0].collidepoint(mx,my) and drag:
             game_btn[0].x, game_btn[0].y = mx-100, my-50
         elif game_btn[0].collidepoint(mx,my) and click:
@@ -340,7 +329,7 @@ def game():
             # pygame.draw.rect(screen, (20,234,200), game_btn[i])
             game_txt[i].draw(True, size)
             game_txt[i].set_animation(10, False,False, True)
-
+            
         #Draw hands
         playerhand.draw_hand()
         dealerhand.draw_hand()
