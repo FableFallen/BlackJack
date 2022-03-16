@@ -7,7 +7,7 @@ import glob
 
 global cards, card_vals
 pygame.init()
-WINDOW_SIZE = ((600,800))
+WINDOW_SIZE = ((600,700))
 screen = pygame.display.set_mode(WINDOW_SIZE)
 title = pygame.display.set_caption('Black Jack')
 clock = pygame.time.Clock()
@@ -72,7 +72,6 @@ def sort(arr):
 
         temp[section +offset] = path
         tempValues[section + offset] = (card_num)
-    print(tempValues)
     return temp, tempValues
 temp = []
 paths,temp = sort(paths)
@@ -84,7 +83,6 @@ for val in temp:
         card_vals.append(10)
     else:
         card_vals.append(int(val))
-print(card_vals)
 #Store Cards, Randomize cards, acess cards, card values
 class Deck:
     def __init__(self, cards, cardValues):
@@ -170,9 +168,6 @@ class Deck:
 
         return [top,top_val]
 
-#deck = Deck(cards, cards_vals)
-#playerhand = Deal(screen, deck)
-#playerhand.drawCard() --> history.append(self.deck.get_top) for i range(len(history)): screen.blit(history[i][0], (0,0))
 
 #Display cards in hand
 class Deal:
@@ -296,6 +291,7 @@ def game():
     selector_rect = game_btn[0]
     selectPos = [game_btn[1].y, game_btn[0].y]
     deck = Deck(cards, card_vals)
+    cardSurf = 3
     deck.randomize('0132102110')
     playerhand = Deal(screen,deck,WINDOW_SIZE[1]-deck.cards[-1].get_height())
     dealerhand = Deal(screen,deck, 0)
@@ -310,14 +306,7 @@ def game():
             title.text = 'You Lose!'
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
-        # #Card Postion
-        # if cnt >= len(cards):
-        #     cnt = 0
-        # elif cnt < 0:
-        #     cnt = len(cards)-1
-        # #Drawing Cards
-        # screen.blit(cards[cnt], (0,0))
-        #Clicking/Dragging Button Actions
+        
         if game_btn[0].collidepoint(mx,my) and drag:
             game_btn[0].x, game_btn[0].y = mx-100, my-50
         elif game_btn[0].collidepoint(mx,my) and click:
@@ -367,9 +356,9 @@ def game():
                     playerhand.deal_card()
                 if event.key == pygame.K_y:
                     print(playerhand.history)
-                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_btn[0]):
+                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[0].textrect):
                     playerhand.deal_card()
-                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_btn[1]):
+                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[1].textrect):
                     dealerhand.deal_card()
                 if event.key == pygame.K_w:
                     pos_index += 1
