@@ -12,6 +12,8 @@ screen = pygame.display.set_mode(WINDOW_SIZE)
 title = pygame.display.set_caption('Black Jack')
 clock = pygame.time.Clock()
 alagard_font = "data/fonts/alagard/alagard.ttf"
+backCard = 'data/Cards/Back_0.jpg'
+backCard_img = pygame.image.load(backCard)
 paths = []
 cards = []
 card_vals = []
@@ -171,36 +173,55 @@ class Deck:
 
 #Display cards in hand
 class Deal:
-    def __init__(self, screen, deck, start):
+    def __init__(self, screen, deck, start, dealer = False):
         self.screen = screen
         self.deck = deck
         self.start = start
         self.history = []
         self.first = True
-        self.ace_Vals = [False,False,False,False]
+        self.aceValues = [False,False,False,False]
+        self.backCard_img = backCard_img
+        self.dealer = dealer
+        self.holdCard = None
+        if self.dealer: self.holdCard = [self.deck.cards[1], self.deck.vals[1]]
     
     def hand(self, x , y):
         cards = []
 
-    def busted(self, new_vals):
-        for i in range(len(new_vals)):
-            if new_vals[i] == True:
-                self.deck.vals[i] == 11 
+    def get_Sum(self):
         sum = 0
         for card in self.history:
             sum += card[1]
+        return sum
 
-        if sum > 21:
+    def busted(self, aceValues):
+        self.aceValues = aceValues
+        for i in range(len(self.aceValues)):
+            if self.aceValues[i] == True:
+                self.deck.vals[i] == 11 
+
+        if self.get_Sum() > 21:
             return True
         else:
             return False
     
     def deal_card(self):
-        self.history.append(self.deck.get_top())
-        if self.first and len(self.history) == 1 and self.history[0][1] == 1:
+        top = self.deck.get_top()
+        self.history.append(top)
+        if self.dealer and len(self.history) == 2:
+            self.history[1] = [self.backCard_img,top[1]]
+            self.screen.blit(top[0], (300,200))
+        elif self.dealer and len(self.history)>2:
+            self.history[1] = self.holdCard
+        elif self.first and len(self.history) == 1 and self.history[0][1] == 1:
             self.history[0][1] = 11
             self.first = False
     
+    def dealer_draw(self):
+        while not(self.busted(self.aceValues)) and self.get_Sum() < 16:
+            self.deal_card()
+        return self.busted(self.aceValues)
+
     def draw_hand(self):
         offset = 0
         for card in self.history:
@@ -294,16 +315,21 @@ def game():
     cardSurf = 3
     deck.randomize('0132102110')
     playerhand = Deal(screen,deck,WINDOW_SIZE[1]-deck.cards[-1].get_height())
-    dealerhand = Deal(screen,deck, 0)
+    dealerhand = Deal(screen,deck, 0, True)
     aceValues = [False,False,False,False]
     pos_index = 1
     click  = False
     drag = False
     size = 30
     cnt = 0
+    for i in range(2):
+        dealerhand.deal_card()
+    dealerhand.draw_hand()
     while True:
         if(playerhand.busted(aceValues)):
             title.text = 'You Lose!'
+        if(dealerhand.busted(aceValues)):
+            title.text = ' You Win!'
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
         
@@ -352,14 +378,13 @@ def game():
                     drag = False
             if event.type == KEYDOWN:
                 if event.key == pygame.K_t:
-                    print(busted)
                     playerhand.deal_card()
                 if event.key == pygame.K_y:
                     print(playerhand.history)
                 if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[0].textrect):
                     playerhand.deal_card()
                 if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[1].textrect):
-                    dealerhand.deal_card()
+                    dealerhand.dealer_draw()
                 if event.key == pygame.K_w:
                     pos_index += 1
                 if event.key == pygame.K_s:
