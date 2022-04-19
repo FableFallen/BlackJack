@@ -114,7 +114,7 @@ class Deck:
                 allval = val2 + val1
                 allcard = cardh2 + cardh1
             #two halves merge every other riffle shuffle
-            if num == '1':
+            elif num == '1':
                 cardh1 = self.cards[:len(self.cards)//2]
                 cardh2 = self.cards[len(self.cards)//2:]
                 val1 = self.vals[:len(self.cards)//2]
@@ -125,7 +125,7 @@ class Deck:
                     allcard.append(cardh1[index])
                     allcard.append(cardh2[index])
             #Middle cut
-            if num == '2':
+            elif num == '2':
                 cardh1 = self.cards[0:13]
                 cardh2 = self.cards[13:26]
                 cardh3 = self.cards[26:39]
@@ -135,10 +135,10 @@ class Deck:
                 val3 = self.vals[26:39]
                 val4 = self.vals[39:]
                 allval = val2+val3+val1+val4
-                allcard = cardh2+cardh3+cardh1+cardh4r
+                allcard = cardh2+cardh3+cardh1+cardh4
 
             #top cut- 1/3 off top to bottom
-            if num == '3':
+            elif num == '3':
                 cardh1 = self.cards[0:18]
                 cardh2 = self.cards[18:34]
                 cardh3 = self.cards[34:]
@@ -148,7 +148,7 @@ class Deck:
                 allval = val1+val2+val3
                 allcard = cardh2+cardh3+cardh1
             #bottom cut- 1/3 off bottom to top
-            if num == '4':
+            elif num == '4':
                 cardh1 = self.cards[0:18]
                 cardh2 = self.cards[18:34]
                 cardh3 = self.cards[34:]
@@ -157,10 +157,9 @@ class Deck:
                 val3 = self.vals[34:]
                 allval = val3+val1+val2
                 allcard = cardh3+cardh1+cardh2
-            self.cards = allcard
-            self.vals = allval
+        
             #Cut Middle of Middle and half cut
-            if num == '5':
+            elif num == '5':
                 tempcards = None
                 tempvals = None
                 cardh1 = self.cards[0:13]
@@ -187,7 +186,8 @@ class Deck:
                 val2 = tempvals[26:]
                 allcard = cardh1 + cardh2
                 allval = val1 + val2
-
+            self.cards = allcard
+            self.vals = allval
 
     def get_top(self):
         top = self.cards[0]
@@ -237,7 +237,13 @@ class Deal:
     def deal_card(self):
         top = self.deck.get_top()
         self.history.append(top)
-        if self.dealer and len(self.history) == 2:
+        if top[1] == 1 and len(self.history) == 1:
+            for index in range(len(self.aceValues)):
+                if self.aceValues[index] == False:
+                    self.aceValues[index] = True
+                    break
+            
+        elif self.dealer and len(self.history) == 2:
             self.history[1] = [self.backCard_img,top[1]]
             self.screen.blit(top[0], (300,200))
         elif self.dealer and len(self.history)>2:
@@ -247,6 +253,8 @@ class Deal:
             self.first = False
     
     def dealer_draw(self):
+        if self.get_Sum() < 16:
+            self.history[1] = self.holdCard
         while not(self.busted(self.aceValues)) and self.get_Sum() < 16:
             self.deal_card()
         return self.busted(self.aceValues)
@@ -351,8 +359,8 @@ def aceOptionWindow():
 
 def game():
     seed = ''
-    for i in range(10):
-        seed = seed.join(str(random.randint(0,6)))
+    for i in range(20):
+        seed += (str(random.randint(0,5)))
 
     offset = 100
     title = Text('BlackJack', [0,0,0], 80, screen, WINDOW_SIZE[0], WINDOW_SIZE[1], 0, 0, alagard_font)
@@ -361,8 +369,8 @@ def game():
     selector_rect = game_btn[0]
     selectPos = [game_btn[1].y, game_btn[0].y]
     deck = Deck(cards, card_vals)
-    cardSurf = 3
-    deck.randomize(seed)
+    print(seed)
+    # deck.randomize(seed)
     playerhand = Deal(screen,deck,WINDOW_SIZE[1]-deck.cards[-1].get_height())
     dealerhand = Deal(screen,deck, 0, True)
     aceValues = [False,False,False,False]
@@ -370,7 +378,6 @@ def game():
     click  = False
     drag = False
     size = 30
-    cnt = 0
     for i in range(2):
         dealerhand.deal_card()
     dealerhand.draw_hand()
@@ -401,7 +408,6 @@ def game():
 
         #Drawing Buttons and Text on buttons
         for i in range(len(game_btn)):
-            # pygame.draw.rect(screen, (20,234,200), game_btn[i])
             game_txt[i].draw(True, size)
             game_txt[i].set_animation(10, False,False, True)
 
@@ -430,12 +436,19 @@ def game():
                     pygame.quit
                     sys.exit()
                 if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[0].textrect):
+                    print('Hit')
                     playerhand.deal_card()
+                    print(playerhand.history)
                 if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[1].textrect):
+                    print('Stand')
                     dealerhand.dealer_draw()
-                if event.key == pygame.K_w and event.key == pygame.K_UP:
+                    for i in range(len(dealerhand.history)):
+                        print(dealerhand.history[i])
+
+                    print(dealerhand.get_Sum())
+                if event.key == pygame.K_w or event.key == pygame.K_UP:
                     pos_index += 1
-                if event.key == pygame.K_s and event.key == pygame.K_DOWN:
+                if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                     pos_index -= 1
                 if event.key == pygame.K_MINUS:
                     size -= 10
