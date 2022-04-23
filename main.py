@@ -295,18 +295,25 @@ class Text:
         elif blink:
             self.color = self.ani.blink(spd)
 
-    def draw(self, center, x=0, y=0, text = '', size=None):
-        if len(text) > 0 or (x != 0 and y!= 0):
+    def set_loc(self,w,h,x,y):
+        self.w,self.h,self.x,self.y = w,h,x,y
+
+    def draw(self, center, w=0, h=0, x=0, y=0, text = '', size=None, color = []):
+        if len(text) > 0:
+            self.text = text
+        if len(color) > 0:
+            self.color = color
+        if(x != 0 and y!= 0) or (w != 0 and h!= 0):
+            self.w = w
+            self.h = h
             self.x = x
             self.y = y
-            self.text = text
         self.textobj = self.pyfont.render(self.text, True, self.color)
         if size != None:
             self.pyfont = pygame.font.Font(self.font, size)
             self.textobj = self.pyfont.render(self.text, True, self.color)
             self.textrect = self.textobj.get_rect()
             
-
         if center:  
             self.textrect.x = self.x+(self.w/2-self.textrect.width/2)
             self.textrect.y = self.y+(self.h/2-self.textrect.height/2)
@@ -344,15 +351,14 @@ class animation:
                 
         return self.col
                 
-def aceOptionWindow():
+def aceOptionWindow(hand):
     xoffset = 60
     yoffset = -80
     width, height = 100,60
     mainText = Text([255,0,255], 80, screen, WINDOW_SIZE[0], WINDOW_SIZE[1], 0, 0, 'Ace\'s Option', alagard_font)
     buttons = [pygame.Rect(mainText.textrect.x-(width - mainText.textrect.width)//2-xoffset, mainText.textrect.y-(height-mainText.textrect.height)//2-yoffset, width, height), pygame.Rect(mainText.textrect.x-(width - mainText.textrect.width)//2+xoffset, mainText.textrect.y-(height-mainText.textrect.height)//2-yoffset, width, height)]
     selector = pygame.Rect(mainText.textrect.x-(width - mainText.textrect.width)//2-xoffset, mainText.textrect.y-(height-mainText.textrect.height)//2-yoffset, width, height)
-    optionText = Text([0,255,255], 50, screen, buttons[0].w, buttons[0].h,0,0, '1', alagard_font)
-    # optionText = Text([0,255,255], 50, screen, buttons[0].w, buttons[0].h, buttons[0].x,buttons[0].y, '1', alagard_font)
+    optionText = Text([0,255,255], 50, screen, buttons[0].w, buttons[0].h, buttons[0].x,buttons[0].y, '1', alagard_font)
     pos_index = 0
     while 1:
         screen.fill((255,255,255))
@@ -368,12 +374,26 @@ def aceOptionWindow():
                 sys.exit()
                 pygame.exit()
             if event.type == KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    if pos_index == 0:
+                        return 1
+                    else:
+                        return 11
                 if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                     pos_index -= 1
                 if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                     pos_index += 1
         mainText.draw(True)
-        optionText.draw(True)
+        
+        if (pos_index <= 0):
+            optionText.draw(True,buttons[0].w, buttons[0].h, buttons[0].x,buttons[0].y, '1', 50, [0,255,255])
+        if (pos_index<=0):
+            optionText.draw(True,buttons[1].w, buttons[1].h, buttons[1].x,buttons[1].y, '11', 20, [255,34,90])
+        if (pos_index >= 1):
+            optionText.draw(True,buttons[1].w, buttons[1].h, buttons[1].x,buttons[1].y, '11', 50, [0,255,255])
+        if (pos_index>=1):
+            optionText.draw(True,buttons[0].w, buttons[0].h, buttons[0].x,buttons[0].y, '1', 20, [255,34,90])
+            
         pygame.display.update()
         clock.tick(60)
 
@@ -390,11 +410,12 @@ def game():
     selectPos = [game_btn[1].y, game_btn[0].y]
     deck = Deck(cards, card_vals)
     print(seed)
-    deck.randomize(seed)
+    # deck.randomize(seed)
     playerhand = Deal(screen,deck,WINDOW_SIZE[1]-deck.cards[-1].get_height())
     dealerhand = Deal(screen,deck, 0, True)
     aceValues = [False,False,False,False]
     pos_index = 1
+    first = False
     click  = False
     drag = False
     size = 30
@@ -425,9 +446,7 @@ def game():
         selector_rect.y = selectPos[pos_index]
         #Selector Rect
         pygame.draw.rect(screen, (145,223,232), selector_rect)
-        #Ace Selector
-        if(len(playerhand.history) and playerhand.history[-1][1] == 1):
-            aceOptionWindow()
+         
         #Drawing Buttons and Text on buttons
         for i in range(len(game_btn)):
             game_txt[i].draw(True, size)
@@ -460,6 +479,7 @@ def game():
                 if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[0].textrect):
                     print('Hit')
                     playerhand.deal_card()
+                    first = True
                 if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[1].textrect):
                     print('Stand')
                     dealerhand.dealer_draw()
@@ -478,10 +498,16 @@ def game():
                 if event.key == pygame.K_r:
                     game()
                 if event.key == pygame.K_a:
-                    print(playerhand.history[-1])
+                    print(playerhand.history[-1],'\n', first)
+            if event.type == KEYUP:
+                if event.key == pygame.K_RETURN:
+                    first = False
             
-        
+        #Ace Selector
+        if(first and len(playerhand.history) > 0) and (playerhand.history[-1][1] == 1):
+            playerhand.history[-1][1] = aceOptionWindow(playerhand)
+           
         pygame.display.update()   
         clock.tick(60)
-        
-aceOptionWindow()
+
+game()
