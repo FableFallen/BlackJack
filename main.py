@@ -1,6 +1,6 @@
 from selectors import SelectSelector
 from tkinter.tix import WINDOW
-import pygame,sys,time,os
+import pygame,sys, random
 from pygame.locals import * # Importing all the modules from pygame
 from PIL import Image
 import glob
@@ -116,7 +116,7 @@ class Deck:
                 allval = val2 + val1
                 allcard = cardh2 + cardh1
             #two halves merge every other riffle shuffle
-            if num == '1':
+            elif num == '1':
                 cardh1 = self.cards[:len(self.cards)//2]
                 cardh2 = self.cards[len(self.cards)//2:]
                 val1 = self.vals[:len(self.cards)//2]
@@ -127,7 +127,7 @@ class Deck:
                     allcard.append(cardh1[index])
                     allcard.append(cardh2[index])
             #Middle cut
-            if num == '2':
+            elif num == '2':
                 cardh1 = self.cards[0:13]
                 cardh2 = self.cards[13:26]
                 cardh3 = self.cards[26:39]
@@ -138,19 +138,18 @@ class Deck:
                 val4 = self.vals[39:]
                 allval = val2+val3+val1+val4
                 allcard = cardh2+cardh3+cardh1+cardh4
-
             #top cut- 1/3 off top to bottom
-            if num == '3':
+            elif num == '3':
                 cardh1 = self.cards[0:18]
                 cardh2 = self.cards[18:34]
                 cardh3 = self.cards[34:]
                 val1 = self.vals[0:18]
                 val2 = self.vals[18:34]
                 val3 = self.vals[34:]
-                allval = val1+val2+val3
+                allval = val2+val3+val1
                 allcard = cardh2+cardh3+cardh1
             #bottom cut- 1/3 off bottom to top
-            if num == '4':
+            elif num == '4':
                 cardh1 = self.cards[0:18]
                 cardh2 = self.cards[18:34]
                 cardh3 = self.cards[34:]
@@ -158,7 +157,35 @@ class Deck:
                 val2 = self.vals[18:34]
                 val3 = self.vals[34:]
                 allval = val3+val1+val2
-                allcard = cardh3+cardh1+cardh2
+                allcard = cardh3+cardh1+cardh2 
+            #Cut Middle of Middle and half cut
+            elif num == '5':
+                tempcards = None
+                tempvals = None
+                cardh1 = self.cards[0:13]
+                cardh2 = self.cards[13:26]
+                cardh3 = self.cards[26:39]
+                cardh4 = self.cards[39:]
+                val1 = self.vals[0:13]
+                val2 = self.vals[13:26]
+                val3 = self.vals[26:39]
+                val4 = self.vals[39:]
+                tempcards = cardh2+cardh3+cardh1+cardh4
+                tempvals = val2+val3+val1+val4
+                cardh1 = tempcards[:13-6]
+                cardh2 = tempcards[13-6:13+6]
+                cardh3 = tempcards[19:]
+                val1 = tempvals[:13-6]
+                val2 = tempvals[13-6:13+6]
+                val3 = tempvals[19:]
+                tempcards = cardh1 + cardh2 + cardh3
+                tempvals = val1 + val2 + val3
+                cardh1 = tempcards[:26]
+                cardh2 = tempcards[26:]
+                val1 = tempvals[:26]
+                val2 = tempvals[26:]
+                allcard = cardh1 + cardh2
+                allval = val1 + val2
             self.cards = allcard
             self.vals = allval
 
@@ -209,7 +236,13 @@ class Deal:
     def deal_card(self):
         top = self.deck.get_top()
         self.history.append(top)
-        if self.dealer and len(self.history) == 2:
+        if top[1] == 1 and len(self.history) == 1:
+            for index in range(len(self.aceValues)):
+                if self.aceValues[index] == False:
+                    self.aceValues[index] = True
+                    break
+            
+        elif self.dealer and len(self.history) == 2:
             self.history[1] = [self.backCard_img,top[1]]
             self.screen.blit(top[0], (300,200))
         elif self.dealer and len(self.history)>2:
@@ -219,6 +252,8 @@ class Deal:
             self.first = False
     
     def dealer_draw(self):
+        if self.get_Sum() < 16:
+            self.history[1] = self.holdCard
         while not(self.busted(self.aceValues)) and self.get_Sum() < 16:
             self.deal_card()
         return self.busted(self.aceValues)
@@ -231,17 +266,17 @@ class Deal:
         
 
 class Text:
-    def __init__(self, text, color, size, surf, w ,h, x, y,font = 'arial'):
+    def __init__(self, color, size, surf, w, h, x, y, text = '', font = 'arial'):
         self.text = text
         self.font = font
         self.size = size
         self.color = color
         self.pyfont = pygame.font.Font(self.font, self.size)
         self.textobj = self.pyfont.render(self.text, True, self.color)
-        self.textrect = self.textobj.get_rect(center=(w/2,h/2))
-        self.x =x
+        self.textrect = self.textobj.get_rect(center=(w/2, h/2))
+        self.x = x
         self.y = y
-        self.w, self.h = w,h
+        self.w, self.h = w, h
         self.surf = surf
         self.font = font
         self.ani = animation(self.color)
@@ -260,12 +295,17 @@ class Text:
         elif blink:
             self.color = self.ani.blink(spd)
 
-    def draw(self, center, size=None):
+    def draw(self, center, x=0, y=0, text = '', size=None):
+        if len(text) > 0 or (x != 0 and y!= 0):
+            self.x = x
+            self.y = y
+            self.text = text
         self.textobj = self.pyfont.render(self.text, True, self.color)
         if size != None:
             self.pyfont = pygame.font.Font(self.font, size)
             self.textobj = self.pyfont.render(self.text, True, self.color)
             self.textrect = self.textobj.get_rect()
+            
 
         if center:  
             self.textrect.x = self.x+(self.w/2-self.textrect.width/2)
@@ -304,17 +344,53 @@ class animation:
                 
         return self.col
                 
+def aceOptionWindow():
+    xoffset = 60
+    yoffset = -80
+    width, height = 100,60
+    mainText = Text([255,0,255], 80, screen, WINDOW_SIZE[0], WINDOW_SIZE[1], 0, 0, 'Ace\'s Option', alagard_font)
+    buttons = [pygame.Rect(mainText.textrect.x-(width - mainText.textrect.width)//2-xoffset, mainText.textrect.y-(height-mainText.textrect.height)//2-yoffset, width, height), pygame.Rect(mainText.textrect.x-(width - mainText.textrect.width)//2+xoffset, mainText.textrect.y-(height-mainText.textrect.height)//2-yoffset, width, height)]
+    selector = pygame.Rect(mainText.textrect.x-(width - mainText.textrect.width)//2-xoffset, mainText.textrect.y-(height-mainText.textrect.height)//2-yoffset, width, height)
+    optionText = Text([0,255,255], 50, screen, buttons[0].w, buttons[0].h,0,0, '1', alagard_font)
+    # optionText = Text([0,255,255], 50, screen, buttons[0].w, buttons[0].h, buttons[0].x,buttons[0].y, '1', alagard_font)
+    pos_index = 0
+    while 1:
+        screen.fill((255,255,255))
+        if pos_index > 1:
+            pos_index = 1
+        elif pos_index < 0:
+            pos_index = 0
+        selector.x,selector.y = buttons[pos_index].x, buttons[pos_index].y
+        pygame.draw.rect(screen, [0,0,0], selector)
+        
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                sys.exit()
+                pygame.exit()
+            if event.type == KEYDOWN:
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                    pos_index -= 1
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                    pos_index += 1
+        mainText.draw(True)
+        optionText.draw(True)
+        pygame.display.update()
+        clock.tick(60)
 
 def game():
+    seed = ''
+    for i in range(20):
+        seed += (str(random.randint(0,5)))
+
     offset = 100
-    title = Text('BlackJack', [0,0,0], 80, screen, WINDOW_SIZE[0], WINDOW_SIZE[1], 0, 0, alagard_font)
+    title = Text([0,0,0], 80, screen, WINDOW_SIZE[0], WINDOW_SIZE[1], 0, 0, 'BlackJack', alagard_font)
     game_btn = [pygame.Rect(title.textrect.x-(200 - title.textrect.width)//2, title.textrect.y-(60 - title.textrect.height)//2- offset, 200,60),pygame.Rect(title.textrect.x-(200 - title.textrect.width)//2,title.textrect.y-(60 - title.textrect.height)//2 + offset, 200,60)]
-    game_txt = [Text('Hit',[200,254, 22], 50, screen, game_btn[0].width, game_btn[0].height, game_btn[0].x, game_btn[0].y, alagard_font), Text('Stand', [200,254, 22],  10, screen, game_btn[1].w, game_btn[1].h, game_btn[1].x, game_btn[1].y, alagard_font)]
+    game_txt = [Text([200,254, 22], 50, screen, game_btn[0].width, game_btn[0].height, game_btn[0].x, game_btn[0].y, 'Hit', alagard_font), Text([200,254, 22],  10, screen, game_btn[1].w, game_btn[1].h, game_btn[1].x, game_btn[1].y, 'Stand', alagard_font)]
     selector_rect = game_btn[0]
     selectPos = [game_btn[1].y, game_btn[0].y]
     deck = Deck(cards, card_vals)
-    cardSurf = 3
-    deck.randomize('0132102110')
+    print(seed)
+    deck.randomize(seed)
     playerhand = Deal(screen,deck,WINDOW_SIZE[1]-deck.cards[-1].get_height())
     dealerhand = Deal(screen,deck, 0, True)
     aceValues = [False,False,False,False]
@@ -322,7 +398,6 @@ def game():
     click  = False
     drag = False
     size = 30
-    cnt = 0
     for i in range(2):
         dealerhand.deal_card()
     dealerhand.draw_hand()
@@ -350,10 +425,11 @@ def game():
         selector_rect.y = selectPos[pos_index]
         #Selector Rect
         pygame.draw.rect(screen, (145,223,232), selector_rect)
-
+        #Ace Selector
+        if(len(playerhand.history) and playerhand.history[-1][1] == 1):
+            aceOptionWindow()
         #Drawing Buttons and Text on buttons
         for i in range(len(game_btn)):
-            # pygame.draw.rect(screen, (20,234,200), game_btn[i])
             game_txt[i].draw(True, size)
             game_txt[i].set_animation(10, False,False, True)
             
@@ -378,42 +454,34 @@ def game():
                     click = False
                     drag = False
             if event.type == KEYDOWN:
-                if event.key == pygame.K_t:
-                    playerhand.deal_card()
-                if event.key == pygame.K_y:
-                    print(playerhand.history)
-                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[0].textrect):
-                    playerhand.deal_card()
-                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[1].textrect):
-                    dealerhand.dealer_draw()
-                if event.key == pygame.K_w:
-                    pos_index += 1
-                if event.key == pygame.K_s:
-                    pos_index -= 1
-                if event.key == pygame.K_UP:
-                    pos_index += 1
-                if event.key == pygame.K_DOWN:
-                    pos_index -= 1
-
                 if event.key == pygame.K_w and pygame.key.get_mods() & pygame.KMOD_ALT and pygame.KMOD_LCTRL:
                     pygame.quit
                     sys.exit()
+                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[0].textrect):
+                    print('Hit')
+                    playerhand.deal_card()
+                if event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[1].textrect):
+                    print('Stand')
+                    dealerhand.dealer_draw()
+
+                    print(dealerhand.get_Sum())
+                if event.key == pygame.K_w or event.key == pygame.K_UP:
+                    pos_index += 1
+                if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                    pos_index -= 1
                 if event.key == pygame.K_MINUS:
                     size -= 10
                     print(size)
                 if event.key == pygame.K_EQUALS:
                     size += 10
                     print(size)
+                if event.key == pygame.K_r:
+                    game()
                 if event.key == pygame.K_a:
-                    cnt -= 1
-                if event.key == pygame.K_d:
-                    cnt += 1
-                if event.key == pygame.K_q:
-                    pygame.quit()
-                    sys.exit()
+                    print(playerhand.history[-1])
             
         
         pygame.display.update()   
         clock.tick(60)
         
-game()
+aceOptionWindow()
