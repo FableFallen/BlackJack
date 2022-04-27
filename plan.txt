@@ -1,0 +1,8 @@
+- Add the functionailty for the ace Values
+    :Ideas
+        - Create new window for Ace selection Values
+    :Design
+        - Show the ace card
+        - have two button options on the bottom right beside each other saying '11' or '1'
+- add actual ending and losing states to game
+- add Scores
