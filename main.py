@@ -212,9 +212,6 @@ class Deal:
         self.dealer = dealer
         self.holdCard = None
         if self.dealer: self.holdCard = [self.deck.cards[1], self.deck.vals[1]]
-    
-    def hand(self, x , y):
-        cards = []
 
     def get_Sum(self):
         sum = 0
@@ -259,8 +256,7 @@ class Deal:
             self.first = False
     
     def dealer_draw(self):
-        if self.get_Sum() < 16:
-            self.history[1] = self.holdCard
+        self.history[1] = self.holdCard
         while not(self.busted(self.aceValues)) and self.get_Sum() < 16:
             self.deal_card()
         return self.busted(self.aceValues)
@@ -478,8 +474,11 @@ def game():
     selected = False
     locked = False
     standed = False
+    surf = pygame.display.get_surface().get_rect()
+    veil = pygame.Surface(surf.size)
+    veil.fill([0,0,0])
+    alpha = 0
     while True:
-        
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
         
@@ -514,18 +513,16 @@ def game():
         title.set_animation(1, True, False, False)
 
         #Checking Winning States
-        if standed:
-            if(playerhand.busted(aceValues) or playerhand.winState(dealerhand, True)):
-                print(f'Player: {playerhand.get_Sum()} ||| Dealer: {dealerhand.get_Sum()}')
-                print('Lose')
+        if(playerhand.busted(aceValues) or (standed and dealerhand.winState(playerhand, True))):
+            # print(f'Player: {playerhand.get_Sum()} ||| Dealer: {dealerhand.get_Sum()}\n Dealer win State: {dealerhand.winState(playerhand, True)}')
+            print('Lose')
+            resultMenu('Lose!')
 
-                # resultMenu('Lose!')
-
-                locked = False
-            if(dealerhand.busted(aceValues) or playerhand.winState(dealerhand)):
-                print(f'Player: {playerhand.get_Sum()} ||| Dealer: {dealerhand.get_Sum()}')
-                print("Win")
-                # resultMenu('Won!')
+            locked = False
+        if(dealerhand.busted(aceValues) or (standed and playerhand.winState(dealerhand))):
+            # print(f'Player: {playerhand.get_Sum()} ||| Dealer: {dealerhand.get_Sum()}\n Player win State: {playerhand.winState(dealerhand)}')
+            print("Win")
+            resultMenu('Won!')
 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -551,13 +548,11 @@ def game():
                     print(playerhand.get_Sum())
                     if playerhand.history[-1][1] == 1:
                         selected = True
-
                 if locked == False and event.key == pygame.K_RETURN and selector_rect.colliderect(game_txt[1].textrect):
                     print('Stand')
                     standed = True
                     dealerhand.dealer_draw()
                     print(dealerhand.get_Sum())
-
                 if locked == False and event.key == pygame.K_w or event.key == pygame.K_UP:
                     pos_index += 1
                 if locked == False and event.key == pygame.K_s or event.key == pygame.K_DOWN:
@@ -571,7 +566,10 @@ def game():
                 if event.key == pygame.K_r:
                     game()
                 if event.key == pygame.K_a:
-                    print(standed)
+                    dealerhand.draw_hand()
+                    print(dealerhand.history)
+                if event.key == pygame.K_e:
+                    alpha += 8
             
             
         #Ace Selector
@@ -579,7 +577,10 @@ def game():
             playerhand.history[-1][1] = aceOptionWindow(playerhand)
             print(playerhand.get_Sum())
             selected = False
-           
+        
+        veil.set_alpha(alpha)
+        screen.blit(veil, (0,0))
+
         pygame.display.update()   
         clock.tick(60)
 
