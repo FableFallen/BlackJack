@@ -446,6 +446,18 @@ def resultMenu(result):
         pygame.display.update()
         clock.tick(60)
 
+def run_once(f):
+    def wrapper(*args,**kwargs):
+        if not wrapper.has_run:
+            wrapper.has_run = True
+            return f(*args,**kwargs)
+    wrapper.has_run = False
+    return wrapper
+
+@run_once
+def set_Time(time):
+    print(f'This is the time! {time}')
+    return time
 
 def game():
     seed = ''
@@ -478,6 +490,11 @@ def game():
     veil = pygame.Surface(surf.size)
     veil.fill([0,0,0])
     alpha = 0
+    TICK = USEREVENT + 1 # event type
+    pygame.time.set_timer(TICK, 1000)
+    time = 0
+    duration = 0
+    duration_reach = False
     while True:
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
@@ -516,13 +533,19 @@ def game():
         if(playerhand.busted(aceValues) or (standed and dealerhand.winState(playerhand, True))):
             # print(f'Player: {playerhand.get_Sum()} ||| Dealer: {dealerhand.get_Sum()}\n Dealer win State: {dealerhand.winState(playerhand, True)}')
             print('Lose')
-            resultMenu('Lose!')
+            duration = set_Time(time)
+            print(duration)
+            if duration_reach:
+                resultMenu('Lose!')
 
             locked = False
         if(dealerhand.busted(aceValues) or (standed and playerhand.winState(dealerhand))):
             # print(f'Player: {playerhand.get_Sum()} ||| Dealer: {dealerhand.get_Sum()}\n Player win State: {playerhand.winState(dealerhand)}')
             print("Win")
-            resultMenu('Won!')
+            duration = set_Time(time)
+            print(duration)
+            if duration_reach:
+                resultMenu('Won!')
 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -569,15 +592,22 @@ def game():
                     dealerhand.draw_hand()
                     print(dealerhand.history)
                 if event.key == pygame.K_e:
-                    alpha += 8
-            
-            
+                    print(time)
+            if event.type == TICK:
+                time += 1
+                      
         #Ace Selector
         if(len(playerhand.history) > 0) and (playerhand.history[-1][1] == 1) and (selected):
             playerhand.history[-1][1] = aceOptionWindow(playerhand)
             print(playerhand.get_Sum())
             selected = False
         
+        if duration != 0 and ((duration - time) < 8):
+            print(duration_reach)
+            print(duration - time)
+            alpha += 8
+        elif duration - time == 8:
+            duration_reach = True
         veil.set_alpha(alpha)
         screen.blit(veil, (0,0))
 
