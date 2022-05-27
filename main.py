@@ -21,6 +21,7 @@ card_vals = []
 for folder in ['Diamonds','Clubs','Hearts','Spades']:
     for filename in glob.glob(f'.\\data\\Cards\\{folder}\\*.jpg'):
         paths.append(filename)
+
 def sort(arr):
     tpath = '.\\data\\Cards\\'
     start = len(tpath)
@@ -454,11 +455,6 @@ def run_once(f):
     wrapper.has_run = False
     return wrapper
 
-@run_once
-def set_Time(time):
-    print(f'This is the time! {time}')
-    return time
-
 def game():
     seed = ''
     for i in range(20):
@@ -488,13 +484,15 @@ def game():
     standed = False
     surf = pygame.display.get_surface().get_rect()
     veil = pygame.Surface(surf.size)
-    veil.fill([0,0,0])
+    veil.fill([255,255,255])
     alpha = 0
     TICK = USEREVENT + 1 # event type
     pygame.time.set_timer(TICK, 1000)
     time = 0
-    duration = 0
     duration_reach = False
+    duration_limit = 3
+    duration = 0
+    run_once = False
     while True:
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
@@ -528,22 +526,20 @@ def game():
         #Drawing Text
         title.draw(True)
         title.set_animation(1, True, False, False)
-
+        
         #Checking Winning States
         if(playerhand.busted(aceValues) or (standed and dealerhand.winState(playerhand, True))):
-            # print(f'Player: {playerhand.get_Sum()} ||| Dealer: {dealerhand.get_Sum()}\n Dealer win State: {dealerhand.winState(playerhand, True)}')
-            print('Lose')
-            duration = set_Time(time)
-            print(duration)
+            if run_once == False:
+                duration = time
+                print(f'Duration: {duration}\nCurrent Time: {time}')
+                run_once = True
             if duration_reach:
                 resultMenu('Lose!')
-
-            locked = False
         if(dealerhand.busted(aceValues) or (standed and playerhand.winState(dealerhand))):
-            # print(f'Player: {playerhand.get_Sum()} ||| Dealer: {dealerhand.get_Sum()}\n Player win State: {playerhand.winState(dealerhand)}')
-            print("Win")
-            duration = set_Time(time)
-            print(duration)
+            if run_once == False:
+                duration = time
+                print(f'Duration: {duration}\nCurrent Time: {time}')
+                run_once = True
             if duration_reach:
                 resultMenu('Won!')
 
@@ -589,8 +585,7 @@ def game():
                 if event.key == pygame.K_r:
                     game()
                 if event.key == pygame.K_a:
-                    dealerhand.draw_hand()
-                    print(dealerhand.history)
+                    print(playerhand.busted(aceValues))
                 if event.key == pygame.K_e:
                     print(time)
             if event.type == TICK:
@@ -602,11 +597,9 @@ def game():
             print(playerhand.get_Sum())
             selected = False
         
-        if duration != 0 and ((duration - time) < 8):
-            print(duration_reach)
-            print(duration - time)
-            alpha += 8
-        elif duration - time == 8:
+        if duration != 0 and ((time - duration) < duration_limit):
+            alpha += 2
+        elif duration != 0 and time - duration == duration_limit:
             duration_reach = True
         veil.set_alpha(alpha)
         screen.blit(veil, (0,0))

@@ -5,15 +5,15 @@ def run_once(f):
         if not wrapper.has_run:
             wrapper.has_run = True
             return f(*args,**kwargs)
-        else:
-            print(a)
-            return a
+        
     wrapper.has_run = False
     return wrapper
 
 @run_once
-def printword(t):
+def setWord(t):
+    global a
     a = t
+    print(a)
 while 1:
-    b = printword('Hello')
-    print(b)
+    setWord('Hello')
+    
