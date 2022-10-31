@@ -31,7 +31,7 @@ def sort(arr):
     card_val = ['1','2','3','4','5','6','7','8','9','10','11','12','13']
     temp = ['','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','', '','','','','','','','','','','','','']
     tempValues = []
-    for ele in temp:
+    for i in range(len(temp)):
         tempValues.append(0)
 
     for path in arr:
@@ -268,7 +268,6 @@ class Deal:
             screen.blit(card[0], (0+offset,self.start))
             offset += 100
         
-
 class Text:
     def __init__(self, color, size, surf, w, h, x, y, text = '', font = 'arial'):
         self.text = text
