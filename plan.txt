@@ -8,3 +8,9 @@
     - Check For invaild test cases
     - check For win states and lose states
 - add Scores
+
+Loading Animations:
+    - Get each frame into a list
+    - animation(location,frame speed)
+        - Frame speed will deictate how long each frame will be repeated
+    - loop to run each frame

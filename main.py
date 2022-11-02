@@ -77,6 +77,13 @@ def sort(arr):
         tempValues[section + offset] = (card_num)
     return temp, tempValues
 
+def load_animation(loc, type):
+    frames = []
+    for filename in glob.glob(f'.\\data\\{loc}\\*.{type}'):
+        frames.append(filename)
+    print(frames)
+
+load_animation("ace","png")
 temp = []
 paths,temp = sort(paths)
 
