@@ -44,6 +44,7 @@ def sort(arr):
                 card = card.replace(folder, '')
         
         card_suit = card
+       
         i = 0
         while i < (len(card_suit)):
             if card_suit[i] in ['0','1','2','3','4','5','6','7','8','9']:
@@ -77,13 +78,19 @@ def sort(arr):
         tempValues[section + offset] = (card_num)
     return temp, tempValues
 
-def load_animation(loc, type):
+def load_animations(folder, extension):
     frames = []
-    for filename in glob.glob(f'.\\data\\{loc}\\*.{type}'):
-        frames.append(filename)
-    print(frames)
+    for filename in glob.glob(f'.\\data\\{folder}\\*.{extension}'):
+        frames.append(pygame.image.load(filename))
+    return (frames)
 
-load_animation("ace","png")
+def run_ani(frame_speed, ani):
+    all_frames = []
+    for frame in ani:
+        for i in range(frame_speed):
+            all_frames.append(frame)
+    return all_frames
+
 temp = []
 paths,temp = sort(paths)
 
@@ -369,6 +376,8 @@ def aceOptionWindow(hand):
     selector = pygame.Rect(mainText.textrect.x-(width - mainText.textrect.width)//2-xoffset, mainText.textrect.y-(height-mainText.textrect.height)//2-yoffset, width, height)
     optionText = Text([0,255,255], 50, screen, buttons[0].w, buttons[0].h, buttons[0].x,buttons[0].y, '1', alagard_font)
     pos_index = 0
+    frame = 0
+    all_frames = run_ani(6, load_animations("ace", "png"))
     while 1:
         screen.fill((255,255,255))
         if pos_index > 1:
@@ -377,7 +386,12 @@ def aceOptionWindow(hand):
             pos_index = 0
         selector.x,selector.y = buttons[pos_index].x, buttons[pos_index].y
         pygame.draw.rect(screen, [0,0,0], selector)
-        
+        screen.blit(all_frames[frame], (0,0))
+        if frame < len(all_frames)-1:
+            frame += 1
+        else:
+            frame = 0
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 sys.exit()
@@ -499,6 +513,7 @@ def game():
     duration_limit = 3
     duration = 0
     run_once = False
+    
     while True:
         mx,my = pygame.mouse.get_pos()
         screen.fill((0,0,0))
@@ -613,4 +628,6 @@ def game():
         pygame.display.update()   
         clock.tick(60)
 
-game()
+#game()
+deck = Deck(cards, card_vals)
+aceOptionWindow(Deal(screen,deck,WINDOW_SIZE[1]-deck.cards[-1].get_height()))
