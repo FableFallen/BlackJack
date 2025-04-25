@@ -1,7 +1,7 @@
 from selectors import SelectSelector
-from tkinter.tix import WINDOW
-import pygame,sys, random,time
-from pygame.locals import * # Importing all the modules from pygame
+from tkinter.constants import *
+import pygame, sys, random, time
+from pygame.locals import *  # Importing all the modules from pygame
 from PIL import Image
 import glob
 
